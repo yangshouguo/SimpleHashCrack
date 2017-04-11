@@ -2,19 +2,19 @@
 import pyvex
 import cle
 from pyvex import stmt,expr
-ld = cle.Loader("HelloWorld")
 
 Not_handle_tag = ["Ist_IMark","Ist_AbiHint"]
 var_allocate = {}
 class SimpleHashCrash:
-    def __init__(self , start_addr , checksum , leng):
+    def __init__(self , start_addr , checksum , leng , executablefilename):
+        self.ld = cle.Loader(executablefilename)
         self.fun_addr = start_addr
         self.checksum = checksum
         self.length = leng
     def getIRSBfromBin(self,addr, data_len = 0x100):
         # print hex(addr)
-        some_text_data =  "".join(ld.memory.read_bytes(addr, data_len))
-        irsb = pyvex.IRSB(some_text_data, addr, ld.main_bin.arch)
+        some_text_data =  "".join(self.ld.memory.read_bytes(addr, data_len))
+        irsb = pyvex.IRSB(some_text_data, addr, self.ld.main_bin.arch)
         return irsb
 
 
