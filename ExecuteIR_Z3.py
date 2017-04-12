@@ -397,9 +397,18 @@ class executeIR_Z3:
 
                     strcmd = str(parts[0]) + "=" + str(para)
 
-                    if (para == 'al'):
+                    if (para == 'al' or para == 'ah'):
                         # strcmd = parts[0] + '= rax & 0xff'
                         strcmd = parts[0] + '= rax '
+                    if (para == 'cl' or para == 'ch'):
+                        # strcmd = parts[0] + '= rax & 0xff'
+                        strcmd = parts[0] + '= rcx '
+                    if (para == 'bl' or para == 'bh'):
+                        # strcmd = parts[0] + '= rax & 0xff'
+                        strcmd = parts[0] + '= rbx '
+                    if (para == 'dl' or para == 'dh'):
+                        # strcmd = parts[0] + '= rax & 0xff'
+                        strcmd = parts[0] + '= rdx '
 
                     exec strcmd
 
@@ -534,7 +543,7 @@ class executeIR_Z3:
                         strcmd = parts[0] + " = self.IRtoZ3exprVira(parts[0])"
                         exec strcmd
 
-                    strcmd = parts[0] + '=' + para[0] + ">>" + para[1]
+                    strcmd = parts[0] + '= LShR(' + para[0] + "," + para[1]+")"
                     exec strcmd
                 elif ('And' in item):
 
