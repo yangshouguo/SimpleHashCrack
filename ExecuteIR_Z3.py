@@ -78,7 +78,7 @@ class executeIR_Z3:
         x = str(var)
 
         if ("0x" in x):
-            return int(x[4:],16)
+            return BitVecVal(int(x[4:],16),32)
         elif (x[-1] == 'h'):
             x = x[0:-1]
             x = '0x'+x
@@ -542,8 +542,11 @@ class executeIR_Z3:
                     if (parts[0] not in self.exits_virable):
                         strcmd = parts[0] + " = self.IRtoZ3exprVira(parts[0])"
                         exec strcmd
-
-                    strcmd = parts[0] + '= LShR(' + para[0] + "," + para[1]+")"
+                    # strcmd = "isint = isinstance(para[0], BitVecRef)"
+                    # exec strcmd
+                    # if(not isint):
+                    #     strcmd = "para[0] = "
+                    strcmd = parts[0] + '= LShR(' + para[0] + "," + "2"+")"
                     exec strcmd
                 elif ('And' in item):
 
