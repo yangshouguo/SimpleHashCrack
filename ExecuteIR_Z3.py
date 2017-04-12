@@ -11,9 +11,10 @@ class executeIR_Z3:
         self.End_part  = end_part
         self.Checksum  = checksum
         self.Len       = length
+        self.bit = 32
         self.reg_ax = ['rax' ,'eax' ,'al' ,'ah'] # treat all rax.... as eax
         self.exits_virable = [] # the exits virables to bi mian chong fu fu zhi
-        self.password = [BitVec("b%d" % i, 32) for i in range(length)]
+        self.password = [BitVec("b%d" % i, self.bit) for i in range(length)]
         for i in range(length):
             self.exits_virable.append('b%d' % i)
         self.param_reg = ['rdi'] #registers  that pass parameters
@@ -28,7 +29,10 @@ class executeIR_Z3:
         block = {}
         for x in m:
             if "b" in str(x):
-                block[ord(str(x)[-1:])] = int(str(m[x]))
+                if (len(str(x))<3):
+                    block[ord(str(x)[-1:])] = int(str(m[x]))
+                else:
+                    block[(ord(str(x)[-2])-48)*10+ord(str(x)[-1])] = int(str(m[x]))
         password = "".join(map(chr,block.values()))
         print password
 
@@ -53,7 +57,7 @@ class executeIR_Z3:
                 break
 
     def solve(self):
-        checksum = BitVec('checksum',32)
+        checksum = BitVec('checksum',self.bit)
         F = []
         F.extend([self.is_alphanum(self.password[i])for  i in range(self.Len)])
         checksum_num = self.Checksum
@@ -82,7 +86,7 @@ class executeIR_Z3:
         else:
             if (x not in self.var_allocate):
                 # exec "global %s" % x
-                strcmd = "%s = BitVec('%s',32)" % (x, x)
+                strcmd = "%s = BitVec('%s',self.bit)" % (x, x)
                 exec strcmd
                 self.var_allocate["%s" % x] = eval(x)
                 return eval(x)
@@ -631,6 +635,9 @@ class executeIR_Z3:
                     exec strcmd
                 else:
                     if ("flag" in item):
+                        if (parts[0] not in self.exits_virable):
+                            strcmd = parts[0] + " = self.IRtoZ3exprVira(parts[0])"
+                            exec strcmd
                         continue
                     if (parts[0] not in self.exits_virable):
                         strcmd = parts[0] + " = self.IRtoZ3exprVira(parts[0])"
