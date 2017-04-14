@@ -79,13 +79,16 @@ class executeIR_Z3:
         strcmd = name + " = self.IRtoZ3exprVira('%s')" % name
         exec strcmd
     def IRtoZ3exprVira(self,var):  # if var is number , return a number , else return a z3expr
-        self.exits_virable.append(var)
+        if (var not in self.exits_virable):
+            self.exits_virable.append(var)
         if (var in self.var_allocate):
             return self.var_allocate["%s" % var]
         x = str(var)
 
-        if ("0x" in x):
+        if ("num_0x" in x):
             return BitVecVal(int(x[4:],16),32)
+        elif ("num_" in x):
+            return BitVecVal(int(x[4:],10),32)
         elif (x[-1] == 'h'):
             x = x[0:-1]
             x = '0x'+x
@@ -258,7 +261,11 @@ class executeIR_Z3:
                     # if (para[0] not in self.exits_virable):
                     #     strcmd = para[0] + " = self.IRtoZ3exprVira(para[0])"
                     #     exec strcmd
-                    strcmd = parts[0] + '=' + str(num)
+                    num = self.numtovira(str(num))
+                    if (num not in self.exits_virable):
+                        strcmd = num + " = self.IRtoZ3exprVira(num)"
+                        exec strcmd
+                    strcmd = parts[0] + '=' + (num)
 
                 elif(len(tmp) > 2):
                     strcmd = parts[0] + '=' + tmp
@@ -531,54 +538,31 @@ class executeIR_Z3:
 
                     if (parts[0] not in self.exits_virable):
                         strcmd = parts[0] + " = self.IRtoZ3exprVira(parts[0])"
-
                         exec strcmd
-
                     para = self.getparamInch(item)
-
                     # get parameter expression
-
                     strcmd = 'tmp = eval(para[0])'
-
                     exec strcmd
-
                     tmp = self.storepos(str(tmp))
-
                     if (tmp.isdigit()):  # arm support
-
                         bytesize = 1
-
                         if ('I32' in item):
-
                             bytesize = 4
 
                         elif ('I64' in item):
-
                             bytesize = 8
-
                         elif ('I16' in item):
-
                             bytesize = 2
-
                         mem_num = self.Loader.memory.read_bytes(int(tmp), bytesize)  # read  bytes
-
                         arr_str = ''
-
                         for item in mem_num:
                             arr_str += item
-
                         # arr_str = ''.join(hex(x) for x in mem_num)
-
                         if (bytesize == 4):
-
                             num, = struct.unpack("i", arr_str)
-
                         elif (bytesize == 8):
-
                             num, = struct.unpack('l', arr_str)
-
                         else:
-
                             num, = struct.unpack('h', arr_str)
 
                         # para[0] = self.numtovira(para[0])
@@ -588,28 +572,25 @@ class executeIR_Z3:
                         #     strcmd = para[0] + " = self.IRtoZ3exprVira(para[0])"
 
                         #     exec strcmd
+                        num = self.numtovira(str(num))
+                        if(num not in self.exits_virable):
+                            strcmd = num + " = self.IRtoZ3exprVira(num)"
+                            exec strcmd
+                        strcmd = parts[0] + '=' + (num)
 
-                        strcmd = parts[0] + '=' + str(num)
-
-
-                    elif (len(tmp) > 2):
-
+                    elif (len(tmp) > 3):
                         strcmd = parts[0] + '=' + tmp
-
                         if (tmp not in self.exits_virable):
                             strcmd = tmp + " = self.IRtoZ3exprVira(tmp)"
-
                             exec strcmd
-
                     else:
-
                         if (para[0] not in self.exits_virable):
                             strcmd = para[0] + " = self.IRtoZ3exprVira(para[0])"
-
                             exec strcmd
-
-                        strcmd = parts[0] + '=' + para[0]
-
+                    for item in self.param_reg:
+                        if(item in tmp):
+                            strcmd = parts[0] + "= self.password[i]"
+                            break
                     exec strcmd
                 elif ('PUT' in item):  # PUT(rsp) = t6
                     para = self.getparamInch(item)
@@ -666,7 +647,8 @@ class executeIR_Z3:
                     # exec strcmd
                     # if(not isint):
                     #     strcmd = "para[0] = "
-                    strcmd = parts[0] + '= LShR(' + para[0] + "," + "2"+")"
+                    strcmd = parts[0] + '= LShR(' + para[0] + "," + para[1]+")"
+                    # strcmd = parts[0] + '= ' + para[0] + ">>" + para[1]
                     exec strcmd
                 elif ('And' in item):
 
@@ -933,7 +915,11 @@ class executeIR_Z3:
                     # if (para[0] not in self.exits_virable):
                     #     strcmd = para[0] + " = self.IRtoZ3exprVira(para[0])"
                     #     exec strcmd
-                    strcmd = parts[0] + '=' + str(num)
+                    num = self.numtovira(str(num))
+                    if (num not in self.exits_virable):
+                        strcmd = num + " = self.IRtoZ3exprVira(num)"
+                        exec strcmd
+                    strcmd = parts[0] + '=' + (num)
 
                 elif (len(tmp) > 2):
                     strcmd = parts[0] + '=' + tmp
